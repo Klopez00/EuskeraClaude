@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Euskera Zea Mays-ekin</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #4b4b4b; --sea: #58cc02; --sea-light: #e5f8cc; --sea-dark: #46a302;
+    --sand: #ffffff; --storm: #afafaf; --coral: #ff4b4b; --coral-light: #ffe0e0;
+    --dark: #3c3c3c; --mid: #777777; --light-border: #e5e5e5;
+    --amber: #f59e0b; --amber-light: #fef3c7;
+  }
+  body { font-family: -apple-system, 'Helvetica Neue', system-ui, sans-serif; background: #f7f7f7; color: var(--dark); line-height: 1.6; min-height: 100vh; }
+  h1, h2, h3 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; }
+  .container { max-width: 720px; margin: 0 auto; padding: 24px 20px; }
+  .landing { text-align: center; padding: 60px 20px 40px; }
+  .landing h1 { font-size: 2.8rem; color: var(--dark); line-height: 1.1; margin-bottom: 8px; }
+  .landing .sub { font-size: 1.05rem; color: var(--storm); margin-bottom: 36px; }
+  .landing .bio { max-width: 540px; margin: 0 auto 40px; font-size: 0.92rem; color: var(--mid); line-height: 1.7; text-align: left; }
+  .song-cards { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .song-card { background: white; border: 1px solid var(--light-border); border-radius: 10px; padding: 28px 24px; width: 260px; cursor: pointer; transition: all 0.2s; text-align: left; box-shadow: 0 2px 0 var(--light-border); }
+  .song-card:hover { border-color: var(--sea); box-shadow: 0 2px 0 var(--sea); transform: translateY(-1px); }
+  .song-card h3 { font-size: 1.4rem; color: var(--dark); margin-bottom: 6px; }
+  .song-card p { font-size: 0.85rem; color: var(--storm); line-height: 1.5; }
+  .top-bar { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--light-border); margin-bottom: 24px; }
+  .back-btn { background: none; border: none; cursor: pointer; font-size: 1.4rem; color: var(--storm); padding: 4px 8px; border-radius: 6px; }
+  .back-btn:hover { background: rgba(0,0,0,0.05); }
+  .top-bar h2 { font-size: 1.5rem; color: var(--dark); }
+  .tabs { display: flex; gap: 4px; background: white; border-radius: 10px; padding: 4px; border: 1px solid var(--light-border); margin-bottom: 28px; }
+  .tab { flex: 1; padding: 10px 4px; border: none; background: none; border-radius: 8px; font-family: -apple-system, sans-serif; font-size: 0.70rem; font-weight: 500; color: var(--storm); cursor: pointer; transition: all 0.15s; }
+  .tab.active { background: var(--sea); color: white; }
+  .intro-section { background: white; border-radius: 10px; padding: 28px 24px; border: 1px solid var(--light-border); margin-bottom: 24px; }
+  .intro-section h3 { font-size: 1.3rem; color: var(--dark); margin-bottom: 12px; }
+  .intro-section p { font-size: 0.92rem; color: var(--mid); line-height: 1.7; }
+
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .vocab-card { background: white; border: 1px solid var(--light-border); border-radius: 8px; padding: 16px 18px; cursor: pointer; transition: all 0.15s; min-height: 72px; }
+  .vocab-card:hover { border-color: var(--sea); }
+  .vocab-card .eu { font-family: Georgia, serif; font-size: 1.2rem; color: var(--dark); }
+  .vocab-card .flip-hint { font-size: 0.72rem; color: var(--storm); margin-top: 6px; opacity: 0.6; }
+  .vocab-card .es { font-size: 0.85rem; color: var(--mid); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--light-border); }
+  .vocab-card .note { font-size: 0.78rem; color: var(--sea-dark); margin-top: 4px; font-style: italic; }
+  .vocab-morph-btn{display:block;margin-top:8px;padding:6px 12px;background:#fef9e7;border:1.5px solid #f0d060;border-radius:6px;font-family:-apple-system,sans-serif;font-size:.75rem;font-weight:600;color:#92750c;cursor:pointer;text-align:center}
+  .vocab-morph-btn:hover{background:#fef08a}
+  .vocab-morph-reveal{margin-top:8px;padding:10px 12px;background:#fef9e7;border-radius:6px;border:1px solid #f0d060}
+  .vocab-morph-reveal .morph-root{background:#fef08a;color:#1a1a1a;font-weight:600;padding:1px 5px;border-radius:3px}
+  .vocab-morph-reveal .morph-main{font-size:.9rem;color:#1a1a1a}
+  .vocab-ant-btn{display:block;margin-top:8px;padding:6px 12px;background:#f0ebff;border:1.5px solid #8b5cf6;border-radius:6px;font-family:-apple-system,sans-serif;font-size:.75rem;font-weight:600;color:#8b5cf6;cursor:pointer;text-align:center}
+  .vocab-ant-btn:hover{background:#e4dafc}
+  .vocab-ant-reveal{margin-top:8px;padding:10px 12px;background:#f0ebff;border-radius:6px;border:1px solid #8b5cf6}
+  .vocab-ant-reveal .ant-word-big{font-family:Georgia,serif;font-size:1.05rem;color:#8b5cf6}
+  .vocab-ant-reveal .ant-es{font-size:.8rem;color:var(--mid);margin-top:2px}
+
+  .level-header { display: flex; align-items: center; gap: 10px; margin: 24px 0 14px; }
+  .level-header:first-of-type { margin-top: 0; }
+  .level-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 0.78rem; font-weight: 700; color: white; }
+  .level-badge.l1 { background: var(--sea); }
+  .level-badge.l2 { background: var(--amber); }
+  .level-badge.l3 { background: var(--coral); }
+  .level-text { font-size: 0.82rem; font-weight: 500; color: var(--mid); }
+
+  .known-card { background: white; border: 1px solid var(--amber); border-left: 4px solid var(--amber); border-radius: 8px; padding: 18px 18px 16px; margin-bottom: 16px; }
+  .known-card .eu { font-family: Georgia, serif; font-size: 1.2rem; color: var(--dark); }
+  .known-card .es { font-size: 0.85rem; color: var(--mid); margin-top: 2px; margin-bottom: 12px; }
+  .known-ctx { background: #fefcf5; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; }
+  .known-ctx-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; }
+  .known-ctx-label.orig { color: var(--storm); }
+  .known-ctx-label.here { color: var(--amber); }
+  .known-ctx-phrase { font-family: Georgia, serif; font-size: 0.95rem; color: var(--dark); line-height: 1.4; }
+  .known-ctx-trans { font-size: 0.8rem; color: var(--mid); margin-top: 2px; }
+  .known-arrow { text-align: center; color: var(--amber); font-size: 1.1rem; margin: 4px 0; }
+
+  .phrase-block { background: white; border: 1px solid var(--light-border); border-radius: 10px; padding: 20px 24px; margin-bottom: 14px; cursor: pointer; transition: border-color 0.15s; }
+  .phrase-block:hover { border-color: var(--sea); }
+  .phrase-eu { font-family: Georgia, serif; font-size: 1.15rem; color: var(--dark); line-height: 1.4; }
+  .flip-hint { font-size: 0.72rem; color: var(--storm); margin-top: 8px; opacity: 0.6; }
+  .phrase-es { font-size: 0.88rem; color: var(--mid); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--light-border); }
+  .phrase-note { font-size: 0.8rem; color: var(--sea-dark); margin-top: 8px; font-style: italic; line-height: 1.5; }
+  .grammar-toggle { display: inline-block; margin-top: 10px; font-size: 0.78rem; font-weight: 500; color: var(--sea-dark); cursor: pointer; border: none; background: none; font-family: -apple-system, sans-serif; padding: 4px 0; }
+  .grammar-toggle:hover { text-decoration: underline; }
+  .grammar-box { margin-top: 10px; padding: 14px 16px; background: var(--sea-light); border-radius: 8px; font-size: 0.82rem; line-height: 1.8; color: var(--dark); }
+  .grammar-box .conj { color: var(--sea-dark); font-weight: 600; }
+  .grammar-box .label { color: var(--storm); font-size: 0.76rem; }
+  .reveal-all-btn { display: inline-block; margin-bottom: 16px; padding: 8px 16px; background: none; border: 1.5px solid var(--light-border); border-radius: 8px; font-family: -apple-system, sans-serif; font-size: 0.8rem; font-weight: 500; color: var(--storm); cursor: pointer; }
+  .reveal-all-btn:hover { border-color: var(--sea); color: var(--sea-dark); }
+
+  .praktika-block { background: white; border: 1px solid var(--light-border); border-radius: 10px; padding: 24px; margin-bottom: 16px; }
+  .praktika-original { font-family: Georgia, serif; font-size: 1.1rem; color: var(--dark); margin-bottom: 4px; }
+  .praktika-trans { font-size: 0.82rem; color: var(--storm); margin-bottom: 14px; }
+  .praktika-challenge { font-size: 0.88rem; font-weight: 500; color: var(--sea-dark); margin-bottom: 12px; }
+  .praktika-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--light-border); border-radius: 8px; font-family: -apple-system, sans-serif; font-size: 0.92rem; color: var(--dark); outline: none; }
+  .praktika-input:focus { border-color: var(--sea); }
+  .praktika-show { margin-top: 10px; padding: 8px 16px; background: none; border: 1.5px solid var(--light-border); border-radius: 8px; font-family: -apple-system, sans-serif; font-size: 0.8rem; font-weight: 500; color: var(--storm); cursor: pointer; }
+  .praktika-show:hover { border-color: var(--sea); color: var(--sea-dark); }
+  .praktika-answer { margin-top: 12px; padding: 14px 16px; background: var(--sea-light); border-radius: 8px; }
+  .praktika-answer .ans { font-family: Georgia, serif; font-size: 1.1rem; color: var(--sea-dark); }
+  .praktika-answer .exp { font-size: 0.8rem; color: var(--mid); margin-top: 4px; }
+
+  .quiz-header { text-align: center; margin-bottom: 28px; }
+  .quiz-header h3 { font-size: 1.4rem; color: var(--dark); margin-bottom: 6px; }
+  .quiz-header p { font-size: 0.88rem; color: var(--storm); }
+  .quiz-type-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .quiz-type-btn { padding: 16px 20px; border-radius: 10px; font-family: -apple-system, sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; flex: 1; max-width: 240px; min-width: 140px; text-align: center; background: white; border: 1.5px solid var(--light-border); color: var(--dark); box-shadow: 0 2px 0 var(--light-border); transition: all 0.15s; }
+  .quiz-type-btn:hover { border-color: var(--sea); }
+  .quiz-type-btn:active { box-shadow: none; transform: translateY(2px); }
+  .quiz-type-btn .qt-icon { font-size: 1.4rem; margin-bottom: 6px; }
+  .quiz-type-btn .qt-label { font-size: 0.82rem; color: var(--mid); font-weight: 400; }
+
+  .quiz-progress { height: 4px; background: var(--light-border); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+  .quiz-progress-bar { height: 100%; background: var(--sea); border-radius: 2px; transition: width 0.3s ease; }
+  .quiz-question { background: white; border: 1px solid var(--light-border); border-radius: 10px; padding: 28px 24px; text-align: center; }
+  .quiz-prompt-label { font-size: 0.78rem; color: var(--storm); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .quiz-prompt { font-family: Georgia, serif; font-size: 1.4rem; color: var(--dark); margin-bottom: 24px; line-height: 1.3; }
+  .quiz-mode-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .quiz-mode-btn { padding: 14px 24px; border-radius: 8px; font-family: -apple-system, sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; flex: 1; max-width: 220px; min-width: 140px; }
+  .quiz-mode-btn.test { background: var(--sea); color: white; border: 1.5px solid var(--sea); box-shadow: 0 3px 0 var(--sea-dark); }
+  .quiz-mode-btn.test:active { box-shadow: none; transform: translateY(2px); }
+  .quiz-mode-btn.reveal { background: white; color: var(--dark); border: 1.5px solid var(--light-border); box-shadow: 0 3px 0 var(--light-border); }
+  .quiz-mode-btn.reveal:hover { border-color: var(--sea); }
+  .quiz-mode-btn.reveal:active { box-shadow: none; transform: translateY(2px); }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-opt { padding: 14px 18px; border: 1.5px solid var(--light-border); border-radius: 8px; background: white; cursor: pointer; font-family: -apple-system, sans-serif; font-size: 0.9rem; color: var(--dark); text-align: left; transition: all 0.15s; }
+  .quiz-opt:hover:not(.locked) { border-color: var(--sea); background: var(--sea-light); }
+  .quiz-opt.correct { border-color: var(--sea); background: var(--sea-light); color: var(--sea-dark); font-weight: 600; }
+  .quiz-opt.wrong { border-color: var(--coral); background: var(--coral-light); color: var(--coral); }
+  .quiz-opt.locked { cursor: default; } .quiz-opt.dim { opacity: 0.45; }
+  .quiz-reveal-answer { padding: 18px 24px; background: var(--sea-light); border: 1.5px solid var(--sea); border-radius: 8px; text-align: center; }
+  .quiz-reveal-answer .ans-label { font-size: 0.76rem; color: var(--storm); margin-bottom: 6px; }
+  .quiz-reveal-answer .ans-text { font-family: Georgia, serif; font-size: 1.3rem; color: var(--sea-dark); }
+  .quiz-next { display: block; margin: 20px auto 0; padding: 12px 32px; background: var(--sea); color: white; border: none; border-radius: 8px; font-family: -apple-system, sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; box-shadow: 0 3px 0 var(--sea-dark); }
+  .quiz-next:active { box-shadow: none; transform: translateY(2px); }
+  .quiz-result { text-align: center; padding: 40px 20px; }
+  .quiz-result .score { font-family: Georgia, serif; font-size: 3rem; color: var(--dark); }
+  .quiz-result .msg { font-size: 1rem; color: var(--storm); margin: 8px 0 28px; }
+  .restart-btn { padding: 12px 28px; background: var(--sea); color: white; border: none; border-radius: 8px; font-family: -apple-system, sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; margin: 0 6px; box-shadow: 0 3px 0 var(--sea-dark); }
+  .restart-btn:active { box-shadow: none; transform: translateY(2px); }
+  .restart-btn.outline { background: white; border: 1.5px solid var(--light-border); color: var(--storm); box-shadow: 0 3px 0 var(--light-border); }
+  .combined-quiz-btn { padding: 14px 32px; background: var(--sea); color: white; border: none; border-radius: 10px; font-family: -apple-system, sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; box-shadow: 0 3px 0 var(--sea-dark); }
+  .combined-quiz-btn:active { box-shadow: none; transform: translateY(2px); }
+  .section-label { font-size: 0.78rem; font-weight: 600; color: var(--storm); letter-spacing: 0.03em; margin-bottom: 14px; }
+  @media (max-width: 500px) { .landing h1 { font-size: 2rem; } .song-cards { flex-direction: column; align-items: center; } .song-card { width: 100%; } .vocab-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+<script>
+const KNOWN_WORDS = [
+  { eu: "aurpegia", es: "rostro",
+    orig: "Arpegia euriz bustia",
+    origEs: "El rostro mojado por la lluvia",
+    origSong: "Atalaia",
+    here: "Ilargiak erakusten duen aurpegiaren aurrean / Aurpegi biluziak",
+    hereEs: "Ante la cara que muestra la luna / Los rostros desnudos",
+    hereSong: "Elektrizitatea / Negua joan da ta" },
+  { eu: "euria", es: "lluvia",
+    orig: "Arpegia euriz bustia",
+    origEs: "El rostro mojado por la lluvia",
+    origSong: "Atalaia",
+    here: "Euri tanten artean",
+    hereEs: "Entre las gotas de lluvia",
+    hereSong: "Elektrizitatea" },
+  { eu: "dantza", es: "baile",
+    orig: "Ta guztiak dantzan, guztiak alai",
+    origEs: "Y todos bailando, todos alegres",
+    origSong: "Mari\u00f1elaren zai",
+    here: "Belar artean, bakardadean bilusik dantzan",
+    hereEs: "Entre la hierba, desnuda bailando en soledad",
+    hereSong: "Elektrizitatea" },
+  { eu: "ilun", es: "oscuro/a",
+    orig: "Goiz ilun hartan irten ginen",
+    origEs: "Aquella ma\u00f1ana oscura salimos",
+    origSong: "Atalaia",
+    here: "Gau ilun honen azken arnasketaren",
+    hereEs: "De esta noche oscura, la \u00faltima respiraci\u00f3n",
+    hereSong: "Elektrizitatea" },
+  { eu: "joan", es: "ir, irse",
+    orig: "Marinela Irlandara doa",
+    origEs: "El marinero se va a Irlanda",
+    origSong: "Mari\u00f1elaren zai",
+    here: "Negua joan da ta",
+    hereEs: "El invierno se ha ido",
+    hereSong: "Negua joan da ta" },
+  { eu: "agertu", es: "aparecer",
+    orig: "Bale kume bat agertu zan",
+    origEs: "Apareci\u00f3 una cr\u00eda de ballena",
+    origSong: "Atalaia",
+    here: "Izpi txiki-txikiren bat agertuz doa",
+    hereEs: "Un rayito muy peque\u00f1o va apareciendo",
+    hereSong: "Negua joan da ta" },
+];
+
+const SONGS = {
+  elektrizitatea: {
+    title: "Elektrizitatea",
+    introEs: "Una canci\u00f3n intensa y po\u00e9tica. Alguien baila desnuda entre la hierba, de noche, y cuando la oscuridad la atrapa, decide que si es energ\u00eda, se ir\u00e1 volando. Pide a las estrellas perdidas que sus l\u00e1grimas fecunden la tierra. Si es electricidad, quedar\u00e1 escrita en la tierra para siempre. Existe una versi\u00f3n con la Orquesta Sinf\u00f3nica de Euskadi que merece mucho la pena.",
+    vocab: [
+      { eu: "lurra", es: "tierra", level: 1, ant: "zerua", antEs: "cielo" },
+      { eu: "mundua", es: "mundo", level: 1 },
+      { eu: "gorputza", es: "cuerpo", level: 1 },
+      { eu: "zerua", es: "cielo", level: 1, ant: "lurra", antEs: "tierra" },
+      { eu: "energia", es: "energ\u00eda", level: 1 },
+      { eu: "oina", es: "pie", level: 1, note: "oinak = los pies" },
+      { eu: "belarra", es: "hierba", level: 2 },
+      { eu: "bakardadea", es: "soledad", level: 2, morph: "bakar", morphEs: "solo" },
+      { eu: "pentsamenduak", es: "pensamientos", level: 2, morph: "pentsa", morphEs: "pensar" },
+      { eu: "ilargia", es: "luna", level: 2, morph: "hil + argi", morphEs: "muertos + luz (luz de los muertos)" },
+      { eu: "izarra", es: "estrella", level: 2 },
+      { eu: "arima", es: "alma", level: 2 },
+      { eu: "atea", es: "puerta", level: 2 },
+      { eu: "biluzia", es: "desnudo/a", level: 3 },
+      { eu: "iluntasuna", es: "oscuridad", level: 3, morph: "ilun", morphEs: "oscuro", ant: "argia", antEs: "luz" },
+      { eu: "negar malkoak", es: "l\u00e1grimas", level: 3, morph: "negar", morphEs: "llanto" },
+      { eu: "arnasketa", es: "respiraci\u00f3n", level: 3, morph: "arnas", morphEs: "aliento" },
+      { eu: "amildegi", es: "precipicio", level: 3 },
+      { eu: "ispilua", es: "espejo", level: 3 },
+      { eu: "elektrizitatea", es: "electricidad", level: 3 },
+    ],
+    phrases: [
+      { eu: "Belar artean, bakardadean bilusik dantzan", es: "Entre la hierba, desnuda bailando en soledad" },
+      { eu: "Oinak bustirik, lurraren erdian\nbelarrarekin jolasean", es: "Con los pies mojados, en medio de la tierra\njugando con la hierba" },
+      { eu: "Pentsamenduak joan egin zaizkit\negunarekin batera", es: "Los pensamientos se me han ido\njunto con el d\u00eda",
+        grammar: { label: "Conjugar: joan egin (nor-nori, iragana)", rows: [["niri","joan egin zaizkit","se me han ido"],["zuri","joan egin zaizkizu","se te han ido"],["hari","joan egin zaizkio","se le han ido"],["guri","joan egin zaizkigu","se nos han ido"]] }},
+      { eu: "Iluntasunak hartu egin nau,\nnegar malkoak", es: "La oscuridad me ha atrapado,\nl\u00e1grimas",
+        grammar: { label: "Conjugar: hartu (nork-nor, oraina)", rows: [["hark...ni","hartu nau","me ha atrapado"],["hark...zu","hartu zaitu","te ha atrapado"],["hark...gu","hartu gaitu","nos ha atrapado"]] }},
+      { eu: "Gau ilun honen azken arnasketaren\nazkenengo segunduetan\nnik ere oihukatu egingo dut", es: "En los \u00faltimos segundos\nde la \u00faltima respiraci\u00f3n de esta noche oscura,\nyo tambi\u00e9n gritar\u00e9" },
+      { eu: "Munduak ahazten banau,\nlur honek askatzen banau", es: "Si el mundo me olvida,\nsi esta tierra me libera",
+        grammar: { label: "ba- = si (condicional)", rows: [["ni","ahazten banau","si me olvida"],["zu","ahazten bazaitu","si te olvida"],["gu","ahazten bagaitu","si nos olvida"]] }},
+      { eu: "Zerbait utzi beharko dut\nbehintzat euri tanten artean", es: "Algo tendr\u00e9 que dejar\nal menos entre las gotas de lluvia" },
+      { eu: "Ilargiak erakusten duen\naurpegiaren aurrean", es: "Ante la cara que muestra la luna" },
+      { eu: "Eskatzen diet oihukatuz\nizar galduei", es: "Pido gritando\na las estrellas perdidas" },
+      { eu: "Nire negar malkoek\nernal dezatela lurra", es: "Que mis l\u00e1grimas\nfecunden la tierra" },
+      { eu: "Nire arimarekin, energia banaiz", es: "Con mi alma, si soy energ\u00eda" },
+      { eu: "Badaezpada banoa,\nhegaka ez bada ez noa", es: "Por si acaso me voy,\nsi no es volando no me voy" },
+      { eu: "Nire gorputzak eskatzen dizkidan\nate apurtuetara", es: "Hacia las puertas rotas\nque mi cuerpo me pide" },
+      { eu: "Zeruak eskaintzen didan amildegira", es: "Hacia el precipicio que el cielo me ofrece" },
+      { eu: "Izpiluan ikusten dudan\nelektrizitate lur-jausira", es: "Hacia el corrimiento de electricidad\nque veo en el espejo" },
+      { eu: "Energiak lur-jausira narama,\nni neu ere energia banaiz", es: "La energ\u00eda me lleva al corrimiento,\nsi yo tambi\u00e9n soy energ\u00eda" },
+      { eu: "Lurrean betirako idatzirik geldituko naiz", es: "Quedar\u00e9 escrita en la tierra para siempre" },
+      { eu: "Elektrizitatea banaiz, elektrizitatean banaiz\nLurrean idatzirik geldituko naiz", es: "Si soy electricidad, si estoy en la electricidad\nQuedar\u00e9 escrita en la tierra" },
+    ],
+    praktika: [
+      { eu: "Iluntasunak hartu egin nau", es: "(la oscuridad me ha atrapado)", challenge: "\u00bfSi te ha atrapado a ti (zu)?", answer: "Iluntasunak hartu egin zaitu", explanation: "nork-nor: nau (ni) \u2192 zaitu (zu)" },
+      { eu: "Oihukatu egingo dut", es: "(gritar\u00e9)", challenge: "\u00bfSi gritamos nosotros (guk)?", answer: "Oihukatu egingo dugu", explanation: "nork futuro: dut (nik) \u2192 dugu (guk)" },
+      { eu: "Munduak ahazten banau", es: "(si el mundo me olvida)", challenge: "\u00bfSi te olvida a ti?", answer: "Munduak ahazten bazaitu", explanation: "ba- condicional: banau (ni) \u2192 bazaitu (zu)" },
+      { eu: "Lurrean idatzirik geldituko naiz", es: "(quedar\u00e9 escrita en la tierra)", challenge: "\u00bfSi quedamos nosotros?", answer: "Lurrean idatzirik geldituko gara", explanation: "nor futuro: naiz (ni) \u2192 gara (gu)" },
+      { eu: "Pentsamenduak joan egin zaizkit", es: "(los pensamientos se me han ido)", challenge: "\u00bfSi se te han ido a ti (zuri)?", answer: "Pentsamenduak joan egin zaizkizu", explanation: "nor-nori: zaizkit (niri) \u2192 zaizkizu (zuri)" },
+    ]
+  },
+  negua: {
+    title: "Negua joan da ta",
+    introEs: "Una canci\u00f3n sobre el final del invierno interior. El sol tiene miedo esc\u00e9nico, como un actor que lleva tiempo sin actuar. Poco a poco un rayito aparece, la alegr\u00eda abraza, y se pide en voz alta que por favor digan que el invierno se ha ido, porque el alma fr\u00eda no se lo cree. Al final, junto a otra persona, las aristas se redondean. Un \u00fanico sonido en tu pecho.",
+    vocab: [
+      { eu: "elurra", es: "nieve", level: 1 },
+      { eu: "mendia", es: "monta\u00f1a", level: 1 },
+      { eu: "eguzkia", es: "sol", level: 1 },
+      { eu: "ura", es: "agua", level: 1, note: "ur urdinak = aguas azules" },
+      { eu: "begia", es: "ojo", level: 1, ant: "belarria", antEs: "o\u00eddo" },
+      { eu: "negua", es: "invierno", level: 1, ant: "uda", antEs: "verano" },
+      { eu: "beldurra", es: "miedo", level: 2, ant: "ausardia", antEs: "valent\u00eda" },
+      { eu: "poztasuna", es: "alegr\u00eda", level: 2, morph: "poz", morphEs: "alegr\u00eda (ra\u00edz)", ant: "tristura", antEs: "tristeza" },
+      { eu: "larrua", es: "piel", level: 2 },
+      { eu: "belarria", es: "o\u00eddo, oreja", level: 2, ant: "begia", antEs: "ojo" },
+      { eu: "soinua", es: "sonido", level: 2 },
+      { eu: "bularra", es: "pecho", level: 2 },
+      { eu: "teloia", es: "tel\u00f3n", level: 3 },
+      { eu: "izpia", es: "rayo (de luz)", level: 3, note: "izpi txiki-txikiren bat = un rayito muy peque\u00f1o" },
+      { eu: "laztandu", es: "acariciar", level: 3 },
+      { eu: "lainoa", es: "nube, niebla", level: 3 },
+      { eu: "gordina", es: "crudo", level: 3 },
+      { eu: "taupada", es: "latido", level: 3 },
+      { eu: "izara", es: "s\u00e1bana", level: 3 },
+      { eu: "ertza", es: "arista, borde", level: 3, note: "borobildu = redondear" },
+    ],
+    phrases: [
+      { eu: "Elurrak joan direnean\nnire mendien artean", es: "Cuando las nieves se han ido\nde entre mis monta\u00f1as" },
+      { eu: "Eguzkia teloian atzekaldean da", es: "El sol est\u00e1 detr\u00e1s del tel\u00f3n" },
+      { eu: "Ateratzeko beldur da\nbeldur eszenikoa\naspaldi antzeztu ez duen obra honetan", es: "Tiene miedo de salir\nmiedo esc\u00e9nico\nen esta obra que no ha interpretado desde hace tiempo" },
+      { eu: "Izpi txiki-txikiren bat\nagertuz doa gaurkoan", es: "Un rayito muy peque\u00f1o\nva apareciendo hoy" },
+      { eu: "Poztasun handi batek besarkatzen nau", es: "Una gran alegr\u00eda me abraza",
+        grammar: { label: "Conjugar: besarkatu (nork-nor, oraina)", rows: [["hark...ni","besarkatzen nau","me abraza"],["hark...zu","besarkatzen zaitu","te abraza"],["hark...gu","besarkatzen gaitu","nos abraza"]] }},
+      { eu: "Mesedez ozen esan\nnegua joan egin dela\nnire arima hotzak ez du sinisten eta", es: "Por favor decid en voz alta\nque el invierno se ha ido\nque mi alma fr\u00eda no se lo cree" },
+      { eu: "Laztandu nazazu orain\nur urdinen artean", es: "Acar\u00edciame ahora\nentre las aguas azules",
+        grammar: { label: "Imperativo: -nazazu (t\u00fa a m\u00ed)", rows: [["zuk niri","laztandu nazazu","acar\u00edciame"],["zuk niri","besarkatu nazazu","abr\u00e1zame"],["zuk niri","maitatu nazazu","qui\u00e9reme"]] }},
+      { eu: "Orain lainorik ez da", es: "Ahora no hay nubes" },
+      { eu: "Aurpegi biluziak", es: "Los rostros desnudos" },
+      { eu: "Ta larrua jotzean\ngarrasirik ozenena\ngordin amaigabea", es: "Y al golpear la piel\nel grito m\u00e1s fuerte\ncrudo, interminable" },
+      { eu: "Negua joan da ta", es: "El invierno se ha ido" },
+      { eu: "Jaio berrien antzera\ntaupaden beharra dut orain", es: "Como los reci\u00e9n nacidos\nnecesito latidos ahora" },
+      { eu: "Belarriekin ikusteko\nnire begiek entzuten ez dutena", es: "Para ver con los o\u00eddos\nlo que mis ojos no oyen" },
+      { eu: "Mesedez ozen esan\nnegua joan egin dela\nizara guztiak erre ditut eta", es: "Por favor decid en voz alta\nque el invierno se ha ido\nque he quemado todas las s\u00e1banas" },
+      { eu: "Laztandu nazazu orain\nur urdinen artean", es: "Acar\u00edciame ahora\nentre las aguas azules" },
+      { eu: "Soinu bakar bakarra\nzure bularraldean", es: "Un \u00fanico sonido\nen tu pecho" },
+      { eu: "Borobildu zaizkit ertzak\nzure ondoan\nizpi lasaigarri bat", es: "Se me han redondeado las aristas\njunto a ti\nun rayo tranquilizador" },
+    ],
+    praktika: [
+      { eu: "Poztasun handi batek besarkatzen nau", es: "(una gran alegr\u00eda me abraza)", challenge: "\u00bfSi te abraza a ti (zu)?", answer: "Poztasun handi batek besarkatzen zaitu", explanation: "nork-nor: nau (ni) \u2192 zaitu (zu)" },
+      { eu: "Laztandu nazazu", es: "(acar\u00edciame)", challenge: "\u00bfSi se lo pides a varias personas (zuek)?", answer: "Laztandu nazazue", explanation: "imperativo: nazazu (zuk) \u2192 nazazue (zuek)" },
+      { eu: "Negua joan egin dela", es: "(que el invierno se ha ido)", challenge: "\u00bfEn futuro? (que se ir\u00e1)", answer: "Negua joango dela", explanation: "futuro: joan egin dela \u2192 joango dela" },
+      { eu: "Taupaden beharra dut", es: "(necesito latidos)", challenge: "\u00bfSi necesitamos nosotros (guk)?", answer: "Taupaden beharra dugu", explanation: "nork-nor: dut (nik) \u2192 dugu (guk)" },
+      { eu: "Borobildu zaizkit ertzak", es: "(se me han redondeado las aristas)", challenge: "\u00bfSi se te han redondeado a ti?", answer: "Borobildu zaizkizu ertzak", explanation: "nor-nori: zaizkit (niri) \u2192 zaizkizu (zuri)" },
+    ]
+  }
+};
+
+const state = {
+  view: 'landing', song: null, tab: 'sarrera',
+  openGrammar: new Set(), revealedPhrases: new Set(), revealedVocab: new Set(), revealedPraktika: new Set(), revealedAnt: new Set(), revealedMorph: new Set(),
+  quizType: null, // null | 'words' | 'phrases'
+  quizQuestions: [], quizIndex: 0, quizScore: 0, quizTotal: 0,
+  quizAnswered: false, quizDone: false, quizMode: null, quizSelected: null,
+};
+
+function render() {
+  const app = document.getElementById('app');
+  if (state.view === 'landing') app.innerHTML = renderLanding();
+  else if (state.view === 'combined') app.innerHTML = renderCombinedQuiz();
+  else app.innerHTML = renderSong();
+  bindEvents();
+}
+
+function renderLanding() {
+  return `<div class="landing">
+    <h1>Euskera kantekin</h1>
+    <p class="sub">Aprende euskera con canciones de Zea Mays</p>
+    <div class="bio">Zea Mays es uno de esos grupos vascos que tienen b\u00e1sicamente 3 canciones entre las 20 m\u00e1s conocidas de los \u00faltimos 20 a\u00f1os. El resto de su discograf\u00eda solo se la saben los muy fans, pero esas tres se oyen en todas partes. Dos de ellas est\u00e1n aqu\u00ed. Elige una para empezar.</div>
+    <div class="song-cards">
+      <div class="song-card" data-song="elektrizitatea"><h3>Elektrizitatea</h3><p>Poes\u00eda nocturna. Energ\u00eda, electricidad, estrellas perdidas.</p></div>
+      <div class="song-card" data-song="negua"><h3>Negua joan da ta</h3><p>El final del invierno interior. Sol, piel, latidos.</p></div>
+    </div>
+    <div style="text-align:center; margin-top:28px;">
+      <button class="combined-quiz-btn" data-action="combined-quiz">Azterketa orokorra \u2014 bi kantak</button>
+    </div>
+  </div>`;
+}
+
+function renderSong() {
+  const song = SONGS[state.song];
+  const tabs = [
+    { id: 'sarrera', label: 'Sarrera' }, { id: 'ezagunak', label: 'Ezagunak' },
+    { id: 'hitzak', label: 'Hitzak' }, { id: 'esaldiak', label: 'Esaldiak' },
+    { id: 'praktika', label: 'Praktika' }, { id: 'azterketa', label: 'Azterketa' },
+  ];
+  let content = '';
+  if (state.tab === 'sarrera') content = renderIntro(song);
+  else if (state.tab === 'ezagunak') content = renderKnown();
+  else if (state.tab === 'hitzak') content = renderVocab(song);
+  else if (state.tab === 'esaldiak') content = renderPhrases(song);
+  else if (state.tab === 'praktika') content = renderPraktika(song);
+  else if (state.tab === 'azterketa') content = renderQuiz(song);
+  return `<div class="top-bar"><button class="back-btn" data-action="back">\u2190</button><h2>${song.title}</h2></div>
+    <div class="tabs">${tabs.map(t=>`<button class="tab ${state.tab===t.id?'active':''}" data-tab="${t.id}">${t.label}</button>`).join('')}</div>${content}`;
+}
+
+function renderIntro(song) { return `<div class="intro-section"><h3>De qu\u00e9 va esta canci\u00f3n</h3><p>${song.introEs}</p></div>`; }
+
+function renderKnown() {
+  return `<p class="section-label">Hitz ezagunak \u2014 Palabras que ya viste en Sorotan Bele</p>
+    <p style="font-size:0.88rem; color:var(--mid); margin-bottom:20px;">Estas palabras ya las viste en Atalaia o Mari\u00f1elaren zai. Aqu\u00ed puedes ver en qu\u00e9 frase aparec\u00edan y d\u00f3nde las encuentras ahora.</p>
+    ${KNOWN_WORDS.map(w=>`<div class="known-card">
+      <div class="eu">${w.eu}</div>
+      <div class="es">${w.es}</div>
+      <div class="known-ctx">
+        <div class="known-ctx-label orig">${w.origSong}</div>
+        <div class="known-ctx-phrase">${w.orig}</div>
+        <div class="known-ctx-trans">${w.origEs}</div>
+      </div>
+      <div class="known-arrow">\u2193</div>
+      <div class="known-ctx">
+        <div class="known-ctx-label here">${w.hereSong}</div>
+        <div class="known-ctx-phrase">${w.here}</div>
+        <div class="known-ctx-trans">${w.hereEs}</div>
+      </div>
+    </div>`).join('')}`;
+}
+
+function renderVocab(song) {
+  const allR = song.vocab.every((_,i)=>state.revealedVocab.has(state.song+'-'+i));
+  const levels = [
+    { n:1, label:'B\u00e1sico \u2014 Palabras del d\u00eda a d\u00eda', cls:'l1' },
+    { n:2, label:'Intermedio \u2014 Comunes pero menos obvias', cls:'l2' },
+    { n:3, label:'Avanzado \u2014 Po\u00e9tico / menos frecuente', cls:'l3' },
+  ];
+  let html = `<p class="section-label">Hitz gakoak \u2014 Toca para ver la traducci\u00f3n</p>
+    <button class="reveal-all-btn" data-action="reveal-all-vocab">${allR?'Ocultar todas':'Mostrar todas'}</button>`;
+  levels.forEach(lv => {
+    const words = song.vocab.map((v,i)=>({...v,idx:i})).filter(v=>v.level===lv.n);
+    if (!words.length) return;
+    html += `<div class="level-header"><span class="level-badge ${lv.cls}">${lv.n}</span><span class="level-text">${lv.label}</span></div>`;
+    html += `<div class="vocab-grid">${words.map(v=>{
+      const r = state.revealedVocab.has(state.song+'-'+v.idx);
+      const ar = state.revealedAnt.has(state.song+'-a-'+v.idx);
+      const mr = state.revealedMorph.has(state.song+'-m-'+v.idx);
+      const morphHtml=v.morph?(mr?`<div class="vocab-morph-reveal"><div class="morph-main"><span class="morph-root">${v.morph}</span> = ${v.morphEs}</div></div>`:`<button class="vocab-morph-btn" data-show-morph="${v.idx}">Nondik dator? \ud83d\udd0d</button>`):'';
+      const antHtml=v.ant?(ar?`<div class="vocab-ant-reveal"><div class="ant-word-big">${v.eu} \u2194 ${v.ant}</div><div class="ant-es">${v.es} \u2194 ${v.antEs}</div></div>`:`<button class="vocab-ant-btn" data-show-ant="${v.idx}">Aurkakoa erakutsi \u2194</button>`):'';
+      return `<div class="vocab-card" data-vocab="${v.idx}"><div class="eu">${v.eu}</div>${r?`<div class="es">${v.es}</div>${v.note?`<div class="note">${v.note}</div>`:''}`:''}${morphHtml}${antHtml}${!r&&!v.ant&&!v.morph?`<div class="flip-hint">\u2193</div>`:!r&&(v.ant||v.morph)?`<div class="flip-hint" style="margin-top:6px">traducci\u00f3n \u2193</div>`:''}</div>`;
+    }).join('')}</div>`;
+  });
+  return html;
+}
+
+function renderPhrases(song) {
+  const allR = song.phrases.every((_,i)=>state.revealedPhrases.has(state.song+'-'+i));
+  return `<p class="section-label">Esaldiak \u2014 Toca para ver la traducci\u00f3n</p>
+    <button class="reveal-all-btn" data-action="reveal-all-phrases">${allR?'Ocultar todas':'Mostrar todas'}</button>
+    ${song.phrases.map((p,i)=>{
+      const key=state.song+'-'+i; const rev=state.revealedPhrases.has(key); const gOpen=state.openGrammar.has(key);
+      return `<div class="phrase-block" data-flip="${i}"><div class="phrase-eu">${p.eu.replace(/\n/g,'<br>')}</div>
+        ${rev?`<div class="phrase-es">${p.es.replace(/\n/g,'<br>')}</div>${p.note?`<div class="phrase-note">${p.note}</div>`:''}${p.grammar?`<button class="grammar-toggle" data-grammar="${i}">${gOpen?'\u25be':'\u25b8'} ${p.grammar.label}</button>${gOpen?`<div class="grammar-box">${p.grammar.rows.map(r=>`<span class="label">${r[0]}</span> \u2192 <span class="conj">${r[1]}</span> \u2014 ${r[2]}<br>`).join('')}</div>`:''}`:''}`:`<div class="flip-hint">\u2193</div>`}</div>`;
+    }).join('')}`;
+}
+
+function renderPraktika(song) {
+  return `<p class="section-label">Praktika \u2014 Transforma las frases</p>
+    <p style="font-size:0.88rem;color:var(--mid);margin-bottom:20px;">Escribe tu respuesta y despu\u00e9s comprueba. No se corrige autom\u00e1ticamente.</p>
+    ${song.praktika.map((p,i)=>{
+      const key=state.song+'-p-'+i; const revealed=state.revealedPraktika.has(key);
+      return `<div class="praktika-block"><div class="praktika-original">${p.eu}</div><div class="praktika-trans">${p.es}</div>
+        <div class="praktika-challenge">${p.challenge}</div>
+        <input class="praktika-input" type="text" placeholder="Idatzi hemen..." data-praktika="${i}">
+        <button class="praktika-show" data-show-praktika="${i}">${revealed?'Ezkutatu':'Erantzuna ikusi'}</button>
+        ${revealed?`<div class="praktika-answer"><div class="ans">${p.answer}</div><div class="exp">${p.explanation}</div></div>`:''}</div>`;
+    }).join('')}`;
+}
+
+// ═══════ QUIZ ═══════
+function genWordQuiz(song) {
+  const qs = []; const v = song.vocab;
+  [...v].sort(()=>Math.random()-0.5).slice(0,5).forEach(w=>{const wr=v.filter(x=>x.eu!==w.eu).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.es);qs.push({prompt:w.eu,promptLabel:'Zer esan nahi du?',answer:w.es,options:shuffle([w.es,...wr])});});
+  [...v].sort(()=>Math.random()-0.5).slice(0,5).forEach(w=>{const wr=v.filter(x=>x.eu!==w.eu).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.eu);qs.push({prompt:w.es,promptLabel:'Nola esaten da euskaraz?',answer:w.eu,options:shuffle([w.eu,...wr])});});
+  [...KNOWN_WORDS].sort(()=>Math.random()-0.5).slice(0,2).forEach(w=>{const wr=v.sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.es);qs.push({prompt:w.eu,promptLabel:'Gogoratzen duzu?',answer:w.es,options:shuffle([w.es,...wr])});});
+  return shuffle(qs).slice(0,12);
+}
+
+function genPhraseQuiz(song) {
+  const qs = [];
+  const sp=song.phrases.filter(p=>p.es.length<60);
+  sp.sort(()=>Math.random()-0.5).slice(0,5).forEach(p=>{const wr=sp.filter(x=>x.es!==p.es).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.es);qs.push({prompt:p.eu.replace(/\n/g,' / '),promptLabel:'Itzuli gaztelaniara',answer:p.es,options:shuffle([p.es,...wr])});});
+  const sp2=song.phrases.filter(p=>p.eu.length<50&&!p.eu.includes('\n'));
+  sp2.sort(()=>Math.random()-0.5).slice(0,5).forEach(p=>{const wr=sp2.filter(x=>x.eu!==p.eu).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.eu);qs.push({prompt:p.es,promptLabel:'Nola esaten da euskaraz?',answer:p.eu,options:shuffle([p.eu,...wr])});});
+  return shuffle(qs).slice(0,10);
+}
+
+function genCombinedQuiz() {
+  const allV=[...SONGS.elektrizitatea.vocab,...SONGS.negua.vocab]; const qs=[];
+  [...allV].sort(()=>Math.random()-0.5).slice(0,5).forEach(v=>{const w=allV.filter(x=>x.eu!==v.eu).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.es);qs.push({prompt:v.eu,promptLabel:'Zer esan nahi du?',answer:v.es,options:shuffle([v.es,...w])});});
+  [...allV].sort(()=>Math.random()-0.5).slice(0,5).forEach(v=>{const w=allV.filter(x=>x.eu!==v.eu).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.eu);qs.push({prompt:v.es,promptLabel:'Nola esaten da euskaraz?',answer:v.eu,options:shuffle([v.eu,...w])});});
+  [...KNOWN_WORDS].sort(()=>Math.random()-0.5).slice(0,2).forEach(v=>{const w=allV.sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.es);qs.push({prompt:v.eu,promptLabel:'Gogoratzen duzu?',answer:v.es,options:shuffle([v.es,...w])});});
+  const allP=[...SONGS.elektrizitatea.phrases,...SONGS.negua.phrases]; const sp=allP.filter(p=>p.es.length<55);
+  sp.sort(()=>Math.random()-0.5).slice(0,4).forEach(p=>{const w=sp.filter(x=>x.es!==p.es).sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.es);qs.push({prompt:p.eu.replace(/\n/g,' / '),promptLabel:'Itzuli gaztelaniara',answer:p.es,options:shuffle([p.es,...w])});});
+  return shuffle(qs).slice(0,16);
+}
+
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function renderQuizBody(q) {
+  if (state.quizMode===null) return `<div class="quiz-mode-btns"><button class="quiz-mode-btn test" data-qmode="test">Aukerak erakutsi</button><button class="quiz-mode-btn reveal" data-qmode="reveal">Erantzuna ikusi</button></div>`;
+  if (state.quizMode==='test') return `<div class="quiz-options">${q.options.map((o,i)=>{let c='quiz-opt';if(state.quizAnswered){c+=' locked';if(o===q.answer)c+=' correct';else if(o===state.quizSelected&&o!==q.answer)c+=' wrong';else c+=' dim';}return`<button class="${c}" data-answer="${i}">${o}</button>`;}).join('')}</div>${state.quizAnswered?`<button class="quiz-next" data-action="next-q">Hurrengoa \u2192</button>`:''}`;
+  return `<div class="quiz-reveal-answer"><div class="ans-label">Erantzuna</div><div class="ans-text">${q.answer}</div></div><button class="quiz-next" data-action="next-q">Hurrengoa \u2192</button>`;
+}
+
+function renderQuizResult(backAction) {
+  const pct=state.quizTotal>0?Math.round((state.quizScore/state.quizTotal)*100):0;
+  const msg=state.quizTotal===0?'Erantzun guztiak ikusi dituzu. Saiatu testa egiten!':pct>=80?'Bikain!':pct>=50?'Ondo! Jarraitu praktikatzen.':'Ez kezkatu, saiatu berriro!';
+  const sk=state.quizQuestions.length-state.quizTotal;
+  return `<div class="quiz-result"><div class="score">${state.quizTotal>0?state.quizScore+' / '+state.quizTotal:'\u2014'}</div>
+    <div class="msg">${msg}${sk>0?'<br><span style="font-size:0.82rem;color:var(--storm);">'+sk+' galdera erantzuna ikusi zenuen</span>':''}</div>
+    <button class="restart-btn" data-action="${backAction}">Berriro saiatu</button> <button class="restart-btn outline" data-action="quiz-menu">Atzera</button></div>`;
+}
+
+function renderQuiz(song) {
+  // Type selection
+  if (!state.quizType) {
+    return `<div class="quiz-header"><h3>Azterketa</h3><p>Zer nahi duzu praktikatu?</p></div>
+      <div class="quiz-type-btns">
+        <div class="quiz-type-btn" data-quiztype="words"><div class="qt-icon">Aa</div>Hitzen azterketa<div class="qt-label">Vocabulario eu\u2194es</div></div>
+        <div class="quiz-type-btn" data-quiztype="phrases"><div class="qt-icon">\u201c\u201d</div>Esaldien azterketa<div class="qt-label">Frases eu\u2194es</div></div>
+      </div>`;
+  }
+  if (state.quizDone) return renderQuizResult(state.quizType==='words'?'restart-words':'restart-phrases');
+  if (!state.quizQuestions.length) {
+    state.quizQuestions = state.quizType==='words' ? genWordQuiz(song) : genPhraseQuiz(song);
+    state.quizIndex=0;state.quizScore=0;state.quizTotal=0;state.quizAnswered=false;state.quizMode=null;
+  }
+  const q=state.quizQuestions[state.quizIndex]; const pr=(state.quizIndex/state.quizQuestions.length)*100;
+  const title = state.quizType==='words'?'Hitzen azterketa':'Esaldien azterketa';
+  return `<div class="quiz-header"><h3>${title}</h3><p>${state.quizIndex+1} / ${state.quizQuestions.length}</p></div>
+    <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${pr}%"></div></div>
+    <div class="quiz-question"><div class="quiz-prompt-label">${q.promptLabel}</div><div class="quiz-prompt">${q.prompt}</div>${renderQuizBody(q)}</div>`;
+}
+
+function renderCombinedQuiz() {
+  if (state.quizDone) return `<div class="top-bar"><button class="back-btn" data-action="back">\u2190</button><h2>Azterketa orokorra</h2></div>` + renderQuizResult('restart-combined');
+  if (!state.quizQuestions.length){state.quizQuestions=genCombinedQuiz();state.quizIndex=0;state.quizScore=0;state.quizTotal=0;state.quizAnswered=false;state.quizMode=null;}
+  const q=state.quizQuestions[state.quizIndex]; const pr=(state.quizIndex/state.quizQuestions.length)*100;
+  return `<div class="top-bar"><button class="back-btn" data-action="back">\u2190</button><h2>Azterketa orokorra</h2></div>
+    <div class="quiz-header"><p>${state.quizIndex+1} / ${state.quizQuestions.length}</p></div>
+    <div class="quiz-progress"><div class="quiz-progress-bar" style="width:${pr}%"></div></div>
+    <div class="quiz-question"><div class="quiz-prompt-label">${q.promptLabel}</div><div class="quiz-prompt">${q.prompt}</div>${renderQuizBody(q)}</div>`;
+}
+
+// ═══════ EVENTS ═══════
+function bindEvents() {
+  document.querySelectorAll('.song-card').forEach(el=>el.addEventListener('click',()=>{
+    state.view='song';state.song=el.dataset.song;state.tab='sarrera';
+    state.openGrammar.clear();state.revealedPhrases.clear();state.revealedVocab.clear();state.revealedPraktika.clear();state.revealedAnt.clear();state.revealedMorph.clear();
+    resetQuiz();render();
+  }));
+  document.querySelectorAll('.tab').forEach(el=>el.addEventListener('click',()=>{state.tab=el.dataset.tab;if(el.dataset.tab==='azterketa'){resetQuiz();state.quizType=null;}render();}));
+  document.querySelectorAll('[data-action="back"]').forEach(el=>el.addEventListener('click',()=>{state.view='landing';state.song=null;render();}));
+  document.querySelectorAll('.vocab-card[data-vocab]').forEach(el=>el.addEventListener('click',()=>{const k=state.song+'-'+el.dataset.vocab;state.revealedVocab.has(k)?state.revealedVocab.delete(k):state.revealedVocab.add(k);render();}));
+  document.querySelectorAll('[data-action="reveal-all-vocab"]').forEach(el=>el.addEventListener('click',()=>{const s=SONGS[state.song];const all=s.vocab.every((_,i)=>state.revealedVocab.has(state.song+'-'+i));s.vocab.forEach((_,i)=>{const k=state.song+'-'+i;all?state.revealedVocab.delete(k):state.revealedVocab.add(k);});render();}));
+  document.querySelectorAll('.phrase-block[data-flip]').forEach(el=>el.addEventListener('click',(e)=>{if(e.target.closest('.grammar-toggle')||e.target.closest('.grammar-box'))return;const k=state.song+'-'+el.dataset.flip;state.revealedPhrases.has(k)?state.revealedPhrases.delete(k):state.revealedPhrases.add(k);render();}));
+  document.querySelectorAll('[data-action="reveal-all-phrases"]').forEach(el=>el.addEventListener('click',()=>{const s=SONGS[state.song];const all=s.phrases.every((_,i)=>state.revealedPhrases.has(state.song+'-'+i));s.phrases.forEach((_,i)=>{const k=state.song+'-'+i;all?state.revealedPhrases.delete(k):state.revealedPhrases.add(k);});render();}));
+  document.querySelectorAll('.grammar-toggle').forEach(el=>el.addEventListener('click',(e)=>{e.stopPropagation();const k=state.song+'-'+el.dataset.grammar;state.openGrammar.has(k)?state.openGrammar.delete(k):state.openGrammar.add(k);render();}));
+  document.querySelectorAll('[data-show-praktika]').forEach(el=>el.addEventListener('click',()=>{
+    const k=state.song+'-p-'+el.dataset.showPraktika;state.revealedPraktika.has(k)?state.revealedPraktika.delete(k):state.revealedPraktika.add(k);
+    const inputs={};document.querySelectorAll('.praktika-input').forEach(inp=>{inputs[inp.dataset.praktika]=inp.value;});
+    render();document.querySelectorAll('.praktika-input').forEach(inp=>{if(inputs[inp.dataset.praktika])inp.value=inputs[inp.dataset.praktika];});
+  }));
+  // Morph and antonym reveals
+  document.querySelectorAll('[data-show-morph]').forEach(el=>el.addEventListener('click',(e)=>{e.stopPropagation();const k=state.song+'-m-'+el.dataset.showMorph;state.revealedMorph.has(k)?state.revealedMorph.delete(k):state.revealedMorph.add(k);render();}));
+  document.querySelectorAll('.vocab-morph-reveal').forEach(el=>el.addEventListener('click',(e)=>{e.stopPropagation();const card=el.closest('.vocab-card');if(card){state.revealedMorph.delete(state.song+'-m-'+card.dataset.vocab);render();}}));
+  document.querySelectorAll('[data-show-ant]').forEach(el=>el.addEventListener('click',(e)=>{e.stopPropagation();const k=state.song+'-a-'+el.dataset.showAnt;state.revealedAnt.has(k)?state.revealedAnt.delete(k):state.revealedAnt.add(k);render();}));
+  document.querySelectorAll('.vocab-ant-reveal').forEach(el=>el.addEventListener('click',(e)=>{e.stopPropagation();const card=el.closest('.vocab-card');if(card){state.revealedAnt.delete(state.song+'-a-'+card.dataset.vocab);render();}}));
+  // Quiz type selection
+  document.querySelectorAll('[data-quiztype]').forEach(el=>el.addEventListener('click',()=>{state.quizType=el.dataset.quiztype;resetQuiz();render();}));
+  document.querySelectorAll('[data-action="quiz-menu"]').forEach(el=>el.addEventListener('click',()=>{state.quizType=null;resetQuiz();render();}));
+  document.querySelectorAll('[data-qmode]').forEach(el=>el.addEventListener('click',()=>{state.quizMode=el.dataset.qmode;if(state.quizMode==='reveal')state.quizAnswered=true;render();}));
+  document.querySelectorAll('.quiz-opt:not(.locked)').forEach(el=>el.addEventListener('click',()=>{if(state.quizAnswered)return;const q=state.quizQuestions[state.quizIndex];const sel=q.options[parseInt(el.dataset.answer)];state.quizSelected=sel;state.quizAnswered=true;state.quizTotal++;if(sel===q.answer)state.quizScore++;render();}));
+  document.querySelectorAll('[data-action="next-q"]').forEach(el=>el.addEventListener('click',()=>{state.quizIndex++;state.quizAnswered=false;state.quizSelected=null;state.quizMode=null;if(state.quizIndex>=state.quizQuestions.length)state.quizDone=true;render();}));
+  document.querySelectorAll('[data-action="restart-words"]').forEach(el=>el.addEventListener('click',()=>{resetQuiz();state.quizType='words';state.quizQuestions=genWordQuiz(SONGS[state.song]);render();}));
+  document.querySelectorAll('[data-action="restart-phrases"]').forEach(el=>el.addEventListener('click',()=>{resetQuiz();state.quizType='phrases';state.quizQuestions=genPhraseQuiz(SONGS[state.song]);render();}));
+  document.querySelectorAll('[data-action="combined-quiz"]').forEach(el=>el.addEventListener('click',()=>{state.view='combined';state.song=null;resetQuiz();render();}));
+  document.querySelectorAll('[data-action="restart-combined"]').forEach(el=>el.addEventListener('click',()=>{resetQuiz();state.quizQuestions=genCombinedQuiz();render();}));
+}
+
+function resetQuiz(){state.quizQuestions=[];state.quizIndex=0;state.quizScore=0;state.quizTotal=0;state.quizAnswered=false;state.quizSelected=null;state.quizDone=false;state.quizMode=null;}
+render();
+</script>
+</body>
+</html>

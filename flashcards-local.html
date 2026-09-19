@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Flashcards</title>
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #fff;
+  --text: #1a1a1a;
+  --muted: #777;
+  --accent: #2d5a27;
+  --accent-bg: #e8f0e7;
+  --border: #ddd;
+  --radius: 10px;
+  --shadow: 0 2px 8px rgba(0,0,0,.07);
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1a1a;--surface:#262626;--text:#e4e2dc;--muted:#888;--accent:#6db565;--accent-bg:#2a3a28;--border:#3a3a3a;--shadow:0 2px 8px rgba(0,0,0,.25)}
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.app{max-width:480px;width:100%;margin:0 auto;padding:1rem;flex:1;display:flex;flex-direction:column}
+
+/* --- Setup screen --- */
+.setup{flex:1;display:flex;flex-direction:column;justify-content:center;gap:1rem}
+.setup p{font-size:.85rem;color:var(--muted);line-height:1.5}
+.setup input{width:100%;padding:.65rem .75rem;font-size:.9rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);outline:none}
+.setup input:focus{border-color:var(--accent)}
+.btn{padding:.6rem 1rem;font-size:.9rem;font-weight:500;border:none;border-radius:var(--radius);cursor:pointer;transition:opacity .1s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:disabled{opacity:.4}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+
+/* --- Header --- */
+header{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;margin-bottom:.75rem;border-bottom:1px solid var(--border)}
+header h1{font-size:1rem;font-weight:600}
+.badge{font-size:.75rem;color:var(--muted)}
+.reload-btn{background:none;border:none;font-size:1.1rem;cursor:pointer;padding:.25rem;color:var(--muted)}
+
+/* --- Card --- */
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center;perspective:800px;padding:.5rem 0}
+.flashcard{position:relative;width:100%;min-height:260px;cursor:pointer;transform-style:preserve-3d;transition:transform .4s ease}
+.flashcard.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+.face.back{transform:rotateY(180deg)}
+.face-label{position:absolute;top:.6rem;left:.85rem;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.face-text{font-size:1.5rem;text-align:center;line-height:1.4;word-break:break-word}
+.tap-hint{font-size:.7rem;color:var(--muted);margin-top:.6rem}
+
+/* --- Nav --- */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;gap:.5rem}
+.nav-btn{padding:.5rem .85rem;font-size:.85rem;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:var(--radius);cursor:pointer}
+.nav-btn:disabled{opacity:.3;cursor:default}
+.nav-pos{font-size:.8rem;color:var(--muted)}
+.bottom-row{display:flex;gap:.5rem;justify-content:center;padding-bottom:.5rem}
+.pill{padding:.35rem .7rem;font-size:.75rem;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:20px;cursor:pointer}
+
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:.9rem}
+.error{text-align:center;padding:2rem 1rem;color:#b5442d;font-size:.85rem;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+const APP = document.getElementById("app");
+const STORAGE_KEY = "flashcards_csv_url";
+const DEFAULT_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQaDQK4ijj33Gc2fI4XWil5clbXHDti4qB2ZSF9My2SzkoDz0EEyQ8RAwoej7kp1SPDRRvIGPlUQfY0/pub?output=csv";
+
+let cards = [];
+let idx = 0;
+let flipped = false;
+
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+// --- URL management ---
+function getSavedUrl() { try { return localStorage.getItem(STORAGE_KEY) || ""; } catch { return ""; } }
+function saveUrl(u) { try { localStorage.setItem(STORAGE_KEY, u); } catch {} }
+
+// --- Fetch & parse CSV ---
+async function loadCards(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(resp.status + " " + resp.statusText);
+  const text = await resp.text();
+  const rows = parseCSV(text);
+  // Skip header row, expect col 0 = front, col 1 = back
+  return rows.slice(1).filter(r => r[0] && r[1]).map(r => ({ front: r[0].trim(), back: r[1].trim() }));
+}
+
+function parseCSV(text) {
+  const rows = []; let row = []; let field = ""; let inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"' && text[i+1] === '"') { field += '"'; i++; }
+      else if (ch === '"') inQ = false;
+      else field += ch;
+    } else {
+      if (ch === '"') inQ = true;
+      else if (ch === ',') { row.push(field); field = ""; }
+      else if (ch === '\n' || (ch === '\r' && text[i+1] === '\n')) {
+        if (ch === '\r') i++;
+        row.push(field); field = ""; rows.push(row); row = [];
+      } else field += ch;
+    }
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// --- Setup screen ---
+function showSetup(err) {
+  const saved = getSavedUrl();
+  APP.innerHTML = `
+    <div class="setup">
+      <h2 style="font-size:1.1rem">Flashcards</h2>
+      <p>Pega la URL de tu Google Sheet publicada como CSV.<br>
+      (Archivo → Compartir → Publicar en la web → CSV)</p>
+      ${err ? '<div class="error">'+esc(err)+'</div>' : ''}
+      <input id="urlInput" placeholder="https://docs.google.com/spreadsheets/d/…/pub?output=csv" value="${esc(saved)}">
+      <button class="btn btn-primary" id="goBtn">Cargar</button>
+      ${saved ? '<button class="btn btn-secondary" id="clearBtn">Borrar URL guardada</button>' : ''}
+    </div>`;
+  document.getElementById("goBtn").addEventListener("click", () => {
+    const url = document.getElementById("urlInput").value.trim();
+    if (!url) return;
+    saveUrl(url);
+    boot(url);
+  });
+  if (saved) document.getElementById("clearBtn").addEventListener("click", () => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    showSetup();
+  });
+}
+
+// --- Main UI ---
+function renderMain() {
+  if (!cards.length) { APP.innerHTML = '<div class="empty">La hoja no tiene tarjetas (necesita columnas A y B con datos).</div>'; return; }
+  const c = cards[idx];
+  APP.innerHTML = `
+    <header>
+      <h1>Flashcards</h1>
+      <div>
+        <button class="reload-btn" id="reloadBtn" title="Recargar">↻</button>
+        <span class="badge">${cards.length}</span>
+      </div>
+    </header>
+    <div class="stage">
+      <div class="flashcard" id="fc">
+        <div class="face front">
+          <span class="face-label">Anverso</span>
+          <div class="face-text">${esc(c.front)}</div>
+          <div class="tap-hint">toca para girar</div>
+        </div>
+        <div class="face back">
+          <span class="face-label">Reverso</span>
+          <div class="face-text">${esc(c.back)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn" id="prev" ${idx===0?"disabled":""}>←</button>
+      <span class="nav-pos">${idx+1} / ${cards.length}</span>
+      <button class="nav-btn" id="next" ${idx>=cards.length-1?"disabled":""}>→</button>
+    </div>
+    <div class="bottom-row">
+      <button class="pill" id="shuffleBtn">Barajar</button>
+      <button class="pill" id="configBtn">Cambiar hoja</button>
+    </div>`;
+
+  flipped = false;
+  document.getElementById("fc").addEventListener("click", () => {
+    flipped = !flipped;
+    document.getElementById("fc").classList.toggle("flipped", flipped);
+  });
+  document.getElementById("prev").addEventListener("click", () => { idx--; flipped=false; renderMain(); });
+  document.getElementById("next").addEventListener("click", () => { idx++; flipped=false; renderMain(); });
+  document.getElementById("shuffleBtn").addEventListener("click", () => {
+    for (let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
+    idx=0; flipped=false; renderMain();
+  });
+  document.getElementById("reloadBtn").addEventListener("click", () => boot(getSavedUrl()));
+  document.getElementById("configBtn").addEventListener("click", () => showSetup());
+
+  // Swipe
+  let sx=0;
+  const stage = document.querySelector(".stage");
+  stage.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, {passive:true});
+  stage.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 60) {
+      if (dx < 0 && idx < cards.length-1) { idx++; flipped=false; renderMain(); }
+      else if (dx > 0 && idx > 0) { idx--; flipped=false; renderMain(); }
+    }
+  }, {passive:true});
+}
+
+// --- Boot ---
+async function boot(url) {
+  APP.innerHTML = '<div class="empty">Cargando…</div>';
+  try {
+    cards = await loadCards(url);
+    idx = 0;
+    renderMain();
+  } catch (e) {
+    showSetup("No se pudo cargar: " + (e.message || e));
+  }
+}
+
+// --- Init ---
+const saved = getSavedUrl() || DEFAULT_URL;
+boot(saved);
+</script>
+</body>
+</html>
